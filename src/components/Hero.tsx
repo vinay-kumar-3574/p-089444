@@ -1,12 +1,8 @@
 
-import React, { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
+import React, { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import LottieAnimation from "./LottieAnimation";
 
 const Hero = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [lottieData, setLottieData] = useState<any>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -19,31 +15,6 @@ const Hero = () => {
     
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  useEffect(() => {
-    fetch('/loop-header.lottie')
-      .then(response => response.json())
-      .then(data => setLottieData(data))
-      .catch(error => console.error("Error loading Lottie animation:", error));
-  }, []);
-  
-  useEffect(() => {
-    if (isMobile) return;
-    
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const elements = document.querySelectorAll('.parallax');
-      elements.forEach(el => {
-        const element = el as HTMLElement;
-        const speed = parseFloat(element.dataset.speed || '0.1');
-        const yPos = -scrollY * speed;
-        element.style.setProperty('--parallax-y', `${yPos}px`);
-      });
-    };
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isMobile]);
   
   return (
     <section 
@@ -55,15 +26,15 @@ const Hero = () => {
         padding: isMobile ? '100px 12px 40px' : '120px 20px 60px'
       }}
     >
-      <div className="absolute -top-[10%] -right-[5%] w-1/2 h-[70%] bg-pulse-gradient opacity-20 blur-3xl rounded-full"></div>
+      <div className="absolute -top-[10%] -right-[5%] w-1/2 h-[70%] bg-orange-500/20 opacity-20 blur-3xl rounded-full"></div>
       
-      <div className="container px-4 sm:px-6 lg:px-8 text-center" ref={containerRef}>
+      <div className="container px-4 sm:px-6 lg:px-8 text-center">
         <div className="max-w-4xl mx-auto">
           <div 
-            className="pulse-chip mb-6 opacity-0 animate-fade-in inline-flex" 
+            className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-orange-100 text-orange-700 mb-6 opacity-0 animate-fade-in" 
             style={{ animationDelay: "0.1s" }}
           >
-            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-pulse-500 text-white mr-2">01</span>
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500 text-white mr-2">01</span>
             <span>CampusConnect AI</span>
           </div>
           
@@ -113,7 +84,7 @@ const Hero = () => {
         </div>
       </div>
       
-      <div className="hidden lg:block absolute bottom-0 left-1/4 w-64 h-64 bg-pulse-100/30 rounded-full blur-3xl -z-10 parallax" data-speed="0.05"></div>
+      <div className="hidden lg:block absolute bottom-0 left-1/4 w-64 h-64 bg-orange-100/30 rounded-full blur-3xl -z-10"></div>
     </section>
   );
 };

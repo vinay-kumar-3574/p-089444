@@ -42,8 +42,8 @@ const SpecsSection = () => {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8 sm:mb-16">
           <div className="flex items-center gap-4">
-            <div className="pulse-chip">
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-pulse-500 text-white mr-2">2</span>
+            <div className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-orange-100 text-orange-700">
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500 text-white mr-2">2</span>
               <span>About</span>
             </div>
           </div>
@@ -54,7 +54,7 @@ const SpecsSection = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display leading-tight mb-8">
-              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-pulse-500 to-pulse-600">
+              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-600">
                 Why CampusConnect AI?
               </span>
             </h2>
@@ -71,8 +71,8 @@ const SpecsSection = () => {
                 key={index}
                 className="bg-white p-8 rounded-2xl shadow-elegant hover:shadow-elegant-hover transition-all duration-300 border border-gray-100"
               >
-                <div className="w-14 h-14 bg-pulse-100 rounded-xl flex items-center justify-center mb-6">
-                  <feature.icon className="w-7 h-7 text-pulse-500" />
+                <div className="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center mb-6">
+                  <feature.icon className="w-7 h-7 text-orange-500" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4 text-gray-900">{feature.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{feature.description}</p>
@@ -81,19 +81,19 @@ const SpecsSection = () => {
           </div>
 
           {/* Stats Section */}
-          <div className="mt-20 bg-gradient-to-r from-pulse-500 to-pulse-600 rounded-3xl p-8 sm:p-12 text-white">
+          <div className="mt-20 bg-gradient-to-r from-orange-500 to-orange-600 rounded-3xl p-8 sm:p-12 text-white">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
               <div>
                 <div className="text-4xl sm:text-5xl font-bold mb-2">500+</div>
-                <div className="text-pulse-100">Active Alumni</div>
+                <div className="text-orange-100">Active Alumni</div>
               </div>
               <div>
                 <div className="text-4xl sm:text-5xl font-bold mb-2">2000+</div>
-                <div className="text-pulse-100">Student Connections</div>
+                <div className="text-orange-100">Student Connections</div>
               </div>
               <div>
                 <div className="text-4xl sm:text-5xl font-bold mb-2">95%</div>
-                <div className="text-pulse-100">Success Rate</div>
+                <div className="text-orange-100">Success Rate</div>
               </div>
             </div>
           </div>

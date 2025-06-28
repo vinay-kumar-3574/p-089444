@@ -79,7 +79,7 @@ const Navbar = () => {
           </nav>
           
           <button 
-            className="bg-pulse-500 hover:bg-pulse-600 text-white font-medium py-2 px-6 rounded-full transition-all duration-300"
+            className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-6 rounded-full transition-all duration-300"
           >
             Let's Connect
           </button>
@@ -145,7 +145,7 @@ const Navbar = () => {
           </a>
           
           <button 
-            className="bg-pulse-500 hover:bg-pulse-600 text-white font-medium py-3 px-8 rounded-full transition-all duration-300 mt-4"
+            className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-8 rounded-full transition-all duration-300 mt-4"
           >
             Let's Connect
           </button>
