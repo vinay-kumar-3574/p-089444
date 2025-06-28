@@ -9,6 +9,7 @@ import ImageShowcaseSection from "@/components/ImageShowcaseSection";
 import Features from "@/components/Features";
 import Testimonials from "@/components/Testimonials";
 import Newsletter from "@/components/Newsletter";
+import CTA from "@/components/CTA";
 import MadeByHumans from "@/components/MadeByHumans";
 import Footer from "@/components/Footer";
 
@@ -61,7 +62,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="space-y-4 sm:space-y-8"> {/* Reduced space on mobile */}
+      <main className="space-y-4 sm:space-y-8">
         <Hero />
         <HumanoidSection />
         <SpecsSection />
@@ -70,6 +71,7 @@ const Index = () => {
         <Features />
         <Testimonials />
         <Newsletter />
+        <CTA />
         <MadeByHumans />
       </main>
       <Footer />

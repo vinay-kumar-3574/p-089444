@@ -52,13 +52,14 @@ const Navbar = () => {
             e.preventDefault();
             scrollToTop();
           }}
-          aria-label="Pulse Robot"
+          aria-label="CampusConnect AI"
         >
           <img 
             src="/logo.svg" 
-            alt="Pulse Robot Logo" 
+            alt="CampusConnect AI Logo" 
             className="h-7 sm:h-8" 
           />
+          <span className="text-xl font-semibold text-gray-800">CampusConnect AI</span>
         </a>
 
         {/* Desktop Navigation */}
@@ -73,11 +74,12 @@ const Navbar = () => {
           >
             Home
           </a>
-          <a href="#features" className="nav-link">About</a>
-          <a href="#details" className="nav-link">Contact</a>
+          <a href="#features" className="nav-link">Events</a>
+          <a href="#testimonials" className="nav-link">Mentors</a>
+          <a href="#contact" className="nav-link">Admin</a>
         </nav>
 
-        {/* Mobile menu button - increased touch target */}
+        {/* Mobile menu button */}
         <button 
           className="md:hidden text-gray-700 p-3 focus:outline-none" 
           onClick={toggleMenu}
@@ -87,7 +89,7 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Navigation - improved for better touch experience */}
+      {/* Mobile Navigation */}
       <div className={cn(
         "fixed inset-0 z-40 bg-white flex flex-col pt-16 px-6 md:hidden transition-all duration-300 ease-in-out",
         isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"
@@ -113,17 +115,27 @@ const Navbar = () => {
               document.body.style.overflow = '';
             }}
           >
-            About
+            Events
           </a>
           <a 
-            href="#details" 
+            href="#testimonials" 
             className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100" 
             onClick={() => {
               setIsMenuOpen(false);
               document.body.style.overflow = '';
             }}
           >
-            Contact
+            Mentors
+          </a>
+          <a 
+            href="#contact" 
+            className="text-xl font-medium py-3 px-6 w-full text-center rounded-lg hover:bg-gray-100" 
+            onClick={() => {
+              setIsMenuOpen(false);
+              document.body.style.overflow = '';
+            }}
+          >
+            Admin
           </a>
         </nav>
       </div>
