@@ -18,7 +18,6 @@ const Navbar = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    // Prevent background scrolling when menu is open
     document.body.style.overflow = !isMenuOpen ? 'hidden' : '';
   };
 
@@ -28,7 +27,6 @@ const Navbar = () => {
       behavior: 'smooth'
     });
     
-    // Close mobile menu if open
     if (isMenuOpen) {
       setIsMenuOpen(false);
       document.body.style.overflow = '';
@@ -63,21 +61,29 @@ const Navbar = () => {
         </a>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex space-x-8">
-          <a 
-            href="#" 
-            className="nav-link"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToTop();
-            }}
+        <div className="hidden md:flex items-center space-x-8">
+          <nav className="flex space-x-8">
+            <a 
+              href="#" 
+              className="nav-link"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToTop();
+              }}
+            >
+              Home
+            </a>
+            <a href="#features" className="nav-link">Events</a>
+            <a href="#testimonials" className="nav-link">Mentors</a>
+            <a href="#contact" className="nav-link">Admin</a>
+          </nav>
+          
+          <button 
+            className="bg-pulse-500 hover:bg-pulse-600 text-white font-medium py-2 px-6 rounded-full transition-all duration-300"
           >
-            Home
-          </a>
-          <a href="#features" className="nav-link">Events</a>
-          <a href="#testimonials" className="nav-link">Mentors</a>
-          <a href="#contact" className="nav-link">Admin</a>
-        </nav>
+            Let's Connect
+          </button>
+        </div>
 
         {/* Mobile menu button */}
         <button 
@@ -137,6 +143,12 @@ const Navbar = () => {
           >
             Admin
           </a>
+          
+          <button 
+            className="bg-pulse-500 hover:bg-pulse-600 text-white font-medium py-3 px-8 rounded-full transition-all duration-300 mt-4"
+          >
+            Let's Connect
+          </button>
         </nav>
       </div>
     </header>
