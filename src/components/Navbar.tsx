@@ -1,11 +1,12 @@
-
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,11 +53,7 @@ const Navbar = () => {
           }}
           aria-label="CampusConnect AI"
         >
-          <img 
-            src="/logo.svg" 
-            alt="CampusConnect AI Logo" 
-            className="h-7 sm:h-8" 
-          />
+          
           <span className="text-xl font-semibold text-gray-800">CampusConnect AI</span>
         </a>
 
@@ -73,13 +70,14 @@ const Navbar = () => {
             >
               Home
             </a>
-            <a href="#features" className="nav-link">Events</a>
-            <a href="#testimonials" className="nav-link">Mentors</a>
-            <a href="#contact" className="nav-link">Admin</a>
+            <a href="#features" className="nav-link">Features</a>
+            <a href="#testimonials" className="nav-link">Testimonials</a>
+            <a href="#contact" className="nav-link">Contact us</a>
           </nav>
           
           <button 
-            className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-6 rounded-full transition-all duration-300"
+            className="bg-orange-500 hover:bg-orange-400 hover:brightness-110 text-white font-medium py-2 px-6 rounded-full transition-all duration-300 shadow-md hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+            onClick={() => navigate('/roleselect')}
           >
             Let's Connect
           </button>

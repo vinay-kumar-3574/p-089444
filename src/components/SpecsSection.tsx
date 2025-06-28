@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Users, Calendar, BarChart3, MessageSquare, Zap, Shield } from "lucide-react";
 
@@ -53,12 +52,12 @@ const SpecsSection = () => {
         {/* Main content */}
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display leading-tight mb-8">
-              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-600">
+            <h2 className="about-heading mb-8">
+              <span>
                 Why CampusConnect AI?
               </span>
             </h2>
-            <p className="text-xl sm:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            <p className="about-para">
               CampusConnect AI bridges the gap between students and alumni through intelligent mentorship matching, 
               AI-recommended campus events, and admin dashboards that track engagement in real time.
             </p>
@@ -69,13 +68,13 @@ const SpecsSection = () => {
             {features.map((feature, index) => (
               <div 
                 key={index}
-                className="bg-white p-8 rounded-2xl shadow-elegant hover:shadow-elegant-hover transition-all duration-300 border border-gray-100"
+                className="about-card group"
               >
                 <div className="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center mb-6">
                   <feature.icon className="w-7 h-7 text-orange-500" />
                 </div>
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <h3 className="about-card-title">{feature.title}</h3>
+                <p className="about-card-para">{feature.description}</p>
               </div>
             ))}
           </div>

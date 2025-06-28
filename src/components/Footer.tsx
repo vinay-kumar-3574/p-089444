@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Github, Linkedin, Mail, Phone, MapPin, Users, Calendar, BarChart3 } from "lucide-react";
 
@@ -10,11 +9,7 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-2 mb-6">
-              <img 
-                src="/logo.svg" 
-                alt="CampusConnect AI Logo" 
-                className="h-8 w-auto invert" 
-              />
+             
               <span className="text-xl font-semibold">CampusConnect AI</span>
             </div>
             <p className="text-gray-300 mb-6 leading-relaxed">
@@ -73,11 +68,11 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-6">Quick Links</h3>
             <ul className="space-y-4">
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Home</a></li>
-              <li><a href="#about" className="text-gray-300 hover:text-white transition-colors">About Platform</a></li>
-              <li><a href="#features" className="text-gray-300 hover:text-white transition-colors">Campus Events</a></li>
-              <li><a href="#testimonials" className="text-gray-300 hover:text-white transition-colors">Alumni Network</a></li>
-              <li><a href="#contact" className="text-gray-300 hover:text-white transition-colors">Admin Portal</a></li>
+              <li><a href="#" className="footer-link">Home</a></li>
+              <li><a href="#about" className="footer-link">About Platform</a></li>
+              <li><a href="#features" className="footer-link">Campus Events</a></li>
+              <li><a href="#testimonials" className="footer-link">Alumni Network</a></li>
+              <li><a href="#contact" className="footer-link">Admin Portal</a></li>
             </ul>
           </div>
 
@@ -132,12 +127,12 @@ const Footer = () => {
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm">
-              Made with ❤️ at [Your University] • Powered by AI + n8n
+              Made with ❤️  • Powered by Let's Connect AI 
             </p>
             <div className="flex items-center gap-6 text-sm text-gray-400">
-              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-white transition-colors">Cookie Policy</a>
+              <a href="#" className="footer-link">Privacy Policy</a>
+              <a href="#" className="footer-link">Terms of Service</a>
+              <a href="#" className="footer-link">Cookie Policy</a>
             </div>
           </div>
           <div className="text-center mt-4 pt-4 border-t border-gray-800">
