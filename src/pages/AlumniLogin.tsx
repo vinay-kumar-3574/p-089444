@@ -17,7 +17,7 @@ const AlumniLogin = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      navigate("/dashboard");
+      navigate("/mentorship-dashboard");
     }, 1200);
   };
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
 import { 
   Bell, 
   MessageSquare, 
@@ -102,20 +103,32 @@ const userRole = "alumni"; // Change to 'student' or 'admin' to hide profile tab
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useUser();
   const [activeTab, setActiveTab] = useState("overview");
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [notifications, setNotifications] = useState(3);
-  const [userProfile, setUserProfile] = useState({
-    name: "Alex Johnson",
-    email: "alex.johnson@university.edu",
-    major: "Computer Science",
-    year: "Junior",
-    skills: ["JavaScript", "React", "Node.js"],
-    interests: ["Web Development", "AI/ML", "Startups"],
-    goals: ["Software Engineer", "Tech Leadership", "Innovation"]
-  });
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/userlogin");
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Show loading if user data is not yet loaded
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleLogout = () => {
+    logout();
     toast({
       title: "Logged out successfully",
       description: "You have been logged out of your account.",
@@ -138,7 +151,6 @@ const Dashboard = () => {
   };
 
   const handleProfileUpdate = (updatedProfile: any) => {
-    setUserProfile(updatedProfile);
     setShowProfileSetup(false);
     toast({
       title: "Profile updated!",
@@ -179,8 +191,8 @@ const Dashboard = () => {
                   </Avatar>
                 </button>
                 <div className="hidden md:block">
-                  <p className="text-sm font-medium text-gray-900">{userProfile.name}</p>
-                  <p className="text-xs text-gray-500">{userProfile.major}</p>
+                  <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                  <p className="text-xs text-gray-500">{user.major}</p>
                 </div>
               </div>
               
@@ -195,7 +207,7 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {userProfile.name}! 👋</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {user.name}! 👋</h2>
           <p className="text-gray-600">Here's what's happening in your campus community today.</p>
         </div>
 
@@ -660,7 +672,7 @@ const Dashboard = () => {
               Help us personalize your experience by sharing your skills, interests, and goals.
             </DialogDescription>
           </DialogHeader>
-          <ProfileSetupForm onComplete={handleProfileUpdate} currentProfile={userProfile} />
+          <ProfileSetupForm onComplete={handleProfileUpdate} currentProfile={user} />
         </DialogContent>
       </Dialog>
     </div>

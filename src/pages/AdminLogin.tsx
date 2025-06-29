@@ -1,24 +1,96 @@
 import React, { useState } from "react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
+import { toast } from "@/hooks/use-toast";
 
 const AdminLogin = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { login } = useUser();
+
+  // Helper function to extract name from email
+  const extractNameFromEmail = (email: string) => {
+    const emailPart = email.split('@')[0];
+    // Convert email part to title case (e.g., "john.doe" -> "John Doe")
+    return emailPart
+      .replace(/[._-]/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+
+    try {
+      const response = await fetch("https://n8n-ssznitez.us-east-1.clawcloudrun.com/webhook/admin-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: form.email,
+          password: form.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      console.log("Admin API Response:", data); // Debug log
+
+      if (data.success || data.status === "success" || response.ok) {
+        console.log("Admin login successful, navigating to dashboard..."); // Debug log
+        
+        // Extract admin data from different possible response structures
+        const adminData = data.user || data.userData || data.profile || data;
+        console.log("Admin data from API:", adminData); // Debug log
+        
+        // Check if we have a proper name from the API
+        const apiName = adminData?.name || adminData?.fullName || adminData?.username || data.name;
+        
+        // Save admin profile data with better fallbacks
+        const adminProfile = {
+          email: form.email,
+          name: apiName || extractNameFromEmail(form.email),
+          year: "Admin",
+          major: "Administration",
+          role: "admin"
+        };
+        
+        console.log("Extracted admin profile:", adminProfile); // Debug log
+        
+        login(adminProfile); // Save to context and localStorage
+        toast({
+          title: "Admin login successful!",
+          description: "Welcome to the admin dashboard.",
+        });
+        navigate("/admin-dashboard"); // Navigate to admin dashboard
+      } else {
+        console.log("Admin login failed:", data.message); // Debug log
+        toast({
+          title: "Login failed",
+          description: data.message || "Invalid credentials. Please try again.",
+          variant: "destructive",
+        });
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Admin login error:", error);
+      toast({
+        title: "Login error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
       setLoading(false);
-      navigate("/dashboard");
-    }, 1200);
+    }
   };
 
   return (
