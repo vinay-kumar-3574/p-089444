@@ -38,13 +38,13 @@ const EventForm: React.FC<EventFormProps> = ({ onComplete, onCancel }) => {
         time: formData.time,
         location: formData.location,
         maxSeats: parseInt(formData.maxSeats),
-        // Note: Image upload would need to be handled separately with FormData
-        // For now, we'll send the basic event data
+        image: formData.image ? URL.createObjectURL(formData.image) : "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=400&h=200&fit=crop", // fallback image
+        status: "upcoming",
+        registeredSeats: 0
       };
 
-      console.log("Submitting event data:", eventData);
-
-      const response = await fetch("https://n8n-ssznitez.us-east-1.clawcloudrun.com/webhook/events", {
+      // POST to backend
+      await fetch("http://localhost:3001/api/events", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,24 +52,20 @@ const EventForm: React.FC<EventFormProps> = ({ onComplete, onCancel }) => {
         body: JSON.stringify(eventData),
       });
 
-      const data = await response.json();
+      // POST to n8n webhook (optional, for Google Sheets)
+      await fetch("https://n8n-ssznitez.us-east-1.clawcloudrun.com/webhook/events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(eventData),
+      });
 
-      console.log("Event creation response:", data);
-
-      if (data.success || data.status === "success" || response.ok) {
-        toast({
-          title: "Event created successfully!",
-          description: "The event has been saved and notifications will be sent.",
-        });
-        onComplete(eventData);
-      } else {
-        toast({
-          title: "Event creation failed",
-          description: data.message || "Failed to create event. Please try again.",
-          variant: "destructive",
-        });
-        setLoading(false);
-      }
+      toast({
+        title: "Event created successfully!",
+        description: "The event has been saved and notifications will be sent.",
+      });
+      onComplete(eventData);
     } catch (error) {
       console.error("Event creation error:", error);
       toast({

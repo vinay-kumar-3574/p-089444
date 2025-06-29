@@ -62,95 +62,6 @@ import { toast } from "@/hooks/use-toast";
 import EventForm from "@/components/EventForm";
 import NotificationForm from "@/components/NotificationForm";
 
-// Mock data for demonstration
-const mockStats = {
-  totalStudents: 1247,
-  totalAlumni: 892,
-  totalEvents: 45,
-  totalAttendance: 2340,
-  recentActivity: [
-    { id: 1, type: "mentorship", user: "Sarah Chen", action: "started mentoring", time: "2 hours ago" },
-    { id: 2, type: "event", user: "Tech Career Fair", action: "registered 45 students", time: "4 hours ago" },
-    { id: 3, type: "user", user: "Michael Rodriguez", action: "joined as alumni", time: "6 hours ago" },
-    { id: 4, type: "event", user: "AI Workshop", action: "completed with 89% satisfaction", time: "1 day ago" }
-  ]
-};
-
-const mockEvents = [
-  {
-    id: 1,
-    title: "Tech Career Fair 2024",
-    description: "Connect with top tech companies and explore career opportunities",
-    tags: ["Tech", "Career", "Networking"],
-    image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=400&h=200&fit=crop",
-    date: "2024-02-15",
-    time: "10:00 AM",
-    location: "Main Campus Auditorium",
-    maxSeats: 200,
-    registeredSeats: 156,
-    status: "upcoming"
-  },
-  {
-    id: 2,
-    title: "AI Workshop Series",
-    description: "Learn the latest in artificial intelligence and machine learning",
-    tags: ["AI/ML", "Workshop", "Technical"],
-    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=200&fit=crop",
-    date: "2024-02-20",
-    time: "2:00 PM",
-    location: "Computer Science Building",
-    maxSeats: 50,
-    registeredSeats: 45,
-    status: "upcoming"
-  },
-  {
-    id: 3,
-    title: "Alumni Networking Mixer",
-    description: "Network with successful alumni and build professional connections",
-    tags: ["Networking", "Alumni", "Social"],
-    image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=400&h=200&fit=crop",
-    date: "2024-02-25",
-    time: "6:00 PM",
-    location: "University Club",
-    maxSeats: 100,
-    registeredSeats: 78,
-    status: "upcoming"
-  }
-];
-
-const mockUsers = [
-  {
-    id: 1,
-    name: "Sarah Chen",
-    email: "sarah.chen@university.edu",
-    role: "alumni",
-    batch: "2020",
-    company: "Google",
-    status: "verified",
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
-  },
-  {
-    id: 2,
-    name: "Michael Rodriguez",
-    email: "michael.rodriguez@university.edu",
-    role: "student",
-    batch: "2024",
-    major: "Computer Science",
-    status: "active",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
-  },
-  {
-    id: 3,
-    name: "Emily Watson",
-    email: "emily.watson@university.edu",
-    role: "alumni",
-    batch: "2019",
-    company: "Netflix",
-    status: "verified",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
-  }
-];
-
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useUser();
@@ -160,6 +71,16 @@ const AdminDashboard = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [userFilter, setUserFilter] = useState("all");
+  const [alumniRequests, setAlumniRequests] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    totalAlumni: 0,
+    totalEvents: 0,
+    totalAttendance: 0,
+    recentActivity: []
+  });
 
   // Redirect if not authenticated or not admin
   useEffect(() => {
@@ -175,6 +96,17 @@ const AdminDashboard = () => {
       navigate("/dashboard");
     }
   }, [isAuthenticated, user, navigate]);
+
+  // Fetch events from backend
+  const fetchEvents = async () => {
+    const response = await fetch("http://localhost:3001/api/events");
+    const data = await response.json();
+    setEvents(data);
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
   if (!user) {
     return (
@@ -201,6 +133,31 @@ const AdminDashboard = () => {
     // This function is called after successful API submission
     setShowEventForm(false);
     // You can add additional logic here if needed, like refreshing the events list
+  };
+
+  // Add new event to backend
+  const handleAdminEventRequest = async (eventData) => {
+    try {
+      // POST to backend
+      const response = await fetch("http://localhost:3001/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(eventData),
+      });
+      if (!response.ok) throw new Error("Failed to add event");
+      await fetchEvents(); // Refresh events list
+      toast({
+        title: "Event added!",
+        description: "Your event has been added and will be visible to users.",
+      });
+      setShowEventForm(false);
+    } catch (error) {
+      toast({
+        title: "Error adding event",
+        description: "There was an error adding your event. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSendNotification = (notificationData: any) => {
@@ -291,7 +248,7 @@ const AdminDashboard = () => {
 
         {/* Main Dashboard */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white shadow-sm">
+          <TabsList className="grid w-full grid-cols-5 bg-white shadow-sm">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Overview
@@ -299,6 +256,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="events" className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               Events
+            </TabsTrigger>
+            <TabsTrigger value="alumni-requests" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Alumni Requests
             </TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center gap-2">
               <Bell className="w-4 h-4" />
@@ -320,7 +281,7 @@ const AdminDashboard = () => {
                   <GraduationCap className="h-4 w-4" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{mockStats.totalStudents.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">{stats.totalStudents.toLocaleString()}</div>
                   <p className="text-xs text-blue-100">+12% from last month</p>
                 </CardContent>
               </Card>
@@ -331,7 +292,7 @@ const AdminDashboard = () => {
                   <Building className="h-4 w-4" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{mockStats.totalAlumni.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">{stats.totalAlumni.toLocaleString()}</div>
                   <p className="text-xs text-green-100">+8% from last month</p>
                 </CardContent>
               </Card>
@@ -342,7 +303,7 @@ const AdminDashboard = () => {
                   <Calendar className="h-4 w-4" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{mockStats.totalEvents}</div>
+                  <div className="text-2xl font-bold">{stats.totalEvents}</div>
                   <p className="text-xs text-purple-100">+5 new this month</p>
                 </CardContent>
               </Card>
@@ -353,7 +314,7 @@ const AdminDashboard = () => {
                   <Users className="h-4 w-4" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{mockStats.totalAttendance.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">{stats.totalAttendance.toLocaleString()}</div>
                   <p className="text-xs text-orange-100">+15% from last month</p>
                 </CardContent>
               </Card>
@@ -481,7 +442,7 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockStats.recentActivity.map((activity) => (
+                    {stats.recentActivity.map((activity) => (
                       <div key={activity.id} className="flex items-start space-x-3">
                         <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
                         <div className="flex-1">
@@ -526,64 +487,198 @@ const AdminDashboard = () => {
 
             {/* Events Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockEvents.map((event) => (
-                <Card key={event.id} className="overflow-hidden">
-                  <div className="relative">
-                    <img 
-                      src={event.image} 
-                      alt={event.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-2 right-2">
-                      <Badge variant={event.status === 'upcoming' ? 'default' : 'secondary'}>
-                        {event.status}
-                      </Badge>
-                    </div>
+              {events.length === 0 ? (
+                <Card className="col-span-full p-8 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Calendar className="w-8 h-8 text-gray-400" />
                   </div>
-                  <CardHeader>
-                    <CardTitle className="text-lg">{event.title}</CardTitle>
-                    <CardDescription className="line-clamp-2">{event.description}</CardDescription>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {event.tags.map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        {event.date} at {event.time}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        {event.location}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4" />
-                        {event.registeredSeats}/{event.maxSeats} registered
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center mt-4">
-                      <Button variant="outline" size="sm">
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
-                      </Button>
-                      <div className="flex gap-1">
-                        <Button variant="outline" size="sm">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Events Yet</h3>
+                  <p className="text-gray-600 mb-4">Events will appear here once they are created and approved.</p>
                 </Card>
-              ))}
+              ) : (
+                events.map((event) => (
+                  <Card key={event._id} className="overflow-hidden">
+                    <div className="relative">
+                      <img 
+                        src={event.image} 
+                        alt={event.title}
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="absolute top-2 right-2">
+                        <Badge variant={event.status === 'upcoming' ? 'default' : 'secondary'}>
+                          {event.status}
+                        </Badge>
+                      </div>
+                    </div>
+                    <CardHeader>
+                      <CardTitle className="text-lg">{event.title}</CardTitle>
+                      <CardDescription className="line-clamp-2">{event.description}</CardDescription>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {event.tags.map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          {event.date} at {event.time}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4" />
+                          {event.location}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          {event.registeredSeats}/{event.maxSeats} registered
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center mt-4">
+                        <Button variant="outline" size="sm">
+                          <Eye className="w-4 h-4 mr-1" />
+                          View
+                        </Button>
+                        <div className="flex gap-1">
+                          <Button variant="outline" size="sm">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
+          </TabsContent>
+
+          {/* Alumni Requests Tab */}
+          <TabsContent value="alumni-requests" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Alumni Event Requests</h3>
+              <Dialog open={showEventForm} onOpenChange={setShowEventForm}>
+                <DialogTrigger asChild>
+                  <Button className="flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Request Event from Alumni
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Request Event from Alumni</DialogTitle>
+                    <DialogDescription>
+                      Send a request to alumni to create and host an event for students.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <EventForm onComplete={handleAdminEventRequest} onCancel={() => setShowEventForm(false)} />
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {/* Alumni Requests Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{alumniRequests.filter(r => r.status === 'pending').length}</div>
+                  <p className="text-xs text-muted-foreground">Awaiting alumni response</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Accepted</CardTitle>
+                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{alumniRequests.filter(r => r.status === 'accepted').length}</div>
+                  <p className="text-xs text-muted-foreground">Events created</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Declined</CardTitle>
+                  <XCircle className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{alumniRequests.filter(r => r.status === 'declined').length}</div>
+                  <p className="text-xs text-muted-foreground">Requests declined</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {alumniRequests.length > 0 
+                      ? Math.round((alumniRequests.filter(r => r.status === 'accepted').length / alumniRequests.length) * 100)
+                      : 0}%
+                  </div>
+                  <p className="text-xs text-muted-foreground">Acceptance rate</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Alumni Requests List */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Alumni Requests</CardTitle>
+                <CardDescription>
+                  Track requests sent to alumni for event creation
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {alumniRequests.length === 0 ? (
+                    <Card className="p-8 text-center">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Mail className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No Alumni Requests Yet</h3>
+                      <p className="text-gray-600 mb-4">When you send event requests to alumni, they will appear here for tracking.</p>
+                      <Button onClick={() => setShowEventForm(true)}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Send First Request
+                      </Button>
+                    </Card>
+                  ) : (
+                    alumniRequests.map((request) => (
+                      <div key={request.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          <Avatar>
+                            <AvatarImage src={request.alumni.avatar} />
+                            <AvatarFallback>{request.alumni.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{request.alumni.name}</p>
+                            <p className="text-sm text-gray-500">{request.alumni.email}</p>
+                            <p className="text-sm text-gray-600">{request.eventTitle}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={request.status === 'pending' ? 'secondary' : request.status === 'accepted' ? 'default' : 'destructive'}>
+                            {request.status}
+                          </Badge>
+                          <span className="text-sm text-gray-500">{request.requestedDate}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Notifications Tab */}
@@ -604,7 +699,7 @@ const AdminDashboard = () => {
                       Create and send personalized notifications to your community.
                     </DialogDescription>
                   </DialogHeader>
-                  <NotificationForm onComplete={handleSendNotification} events={mockEvents} onCancel={() => setShowNotificationForm(false)} />
+                  <NotificationForm onComplete={handleSendNotification} events={events} onCancel={() => setShowNotificationForm(false)} />
                 </DialogContent>
               </Dialog>
             </div>
@@ -682,51 +777,61 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockUsers.map((mockUser) => (
-                    <div key={mockUser.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <Avatar>
-                          <AvatarImage src={mockUser.avatar} />
-                          <AvatarFallback>{mockUser.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{mockUser.name}</p>
-                          <p className="text-sm text-gray-500">{mockUser.email}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant={mockUser.role === 'alumni' ? 'default' : 'secondary'}>
-                              {mockUser.role === 'alumni' ? 'Alumni' : 'Student'}
-                            </Badge>
-                            {mockUser.role === 'alumni' && (
-                              <Badge variant={mockUser.status === 'verified' ? 'default' : 'outline'}>
-                                {mockUser.status === 'verified' ? 'Verified' : 'Unverified'}
+                  {users.length === 0 ? (
+                    <Card className="p-8 text-center">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Users className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No Users Yet</h3>
+                      <p className="text-gray-600 mb-4">User data will appear here once students and alumni register.</p>
+                    </Card>
+                  ) : (
+                    users.map((mockUser) => (
+                      <div key={mockUser.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-4">
+                          <Avatar>
+                            <AvatarImage src={mockUser.avatar} />
+                            <AvatarFallback>{mockUser.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{mockUser.name}</p>
+                            <p className="text-sm text-gray-500">{mockUser.email}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant={mockUser.role === 'alumni' ? 'default' : 'secondary'}>
+                                {mockUser.role === 'alumni' ? 'Alumni' : 'Student'}
                               </Badge>
-                            )}
+                              {mockUser.role === 'alumni' && (
+                                <Badge variant={mockUser.status === 'verified' ? 'default' : 'outline'}>
+                                  {mockUser.status === 'verified' ? 'Verified' : 'Unverified'}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        {mockUser.role === 'alumni' && mockUser.status !== 'verified' && (
-                          <Button size="sm" onClick={() => handleVerifyUser(mockUser.id)}>
-                            <UserCheck className="w-4 h-4 mr-1" />
-                            Verify
+                        <div className="flex items-center space-x-2">
+                          {mockUser.role === 'alumni' && mockUser.status !== 'verified' && (
+                            <Button size="sm" onClick={() => handleVerifyUser(mockUser.id)}>
+                              <UserCheck className="w-4 h-4 mr-1" />
+                              Verify
+                            </Button>
+                          )}
+                          <Select onValueChange={(value) => handleChangeUserRole(mockUser.id, value)}>
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="student">Student</SelectItem>
+                              <SelectItem value="alumni">Alumni</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button variant="outline" size="sm">
+                            <MoreHorizontal className="w-4 h-4" />
                           </Button>
-                        )}
-                        <Select onValueChange={(value) => handleChangeUserRole(mockUser.id, value)}>
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="student">Student</SelectItem>
-                            <SelectItem value="alumni">Alumni</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button variant="outline" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>

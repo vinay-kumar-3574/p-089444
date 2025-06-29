@@ -31,82 +31,16 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import ProfileSection from "./ProfileSection";
 
-// Mock data for demonstration
-const mockAlumni = [
-  {
-    id: 1,
-    name: "Dr. Sarah Chen",
-    role: "Senior Software Engineer",
-    company: "Google",
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-    skills: ["React", "TypeScript", "AI/ML"],
-    matchScore: 95,
-    isOnline: true
-  },
-  {
-    id: 2,
-    name: "Michael Rodriguez",
-    role: "Product Manager",
-    company: "Microsoft",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    skills: ["Product Strategy", "User Research", "Agile"],
-    matchScore: 87,
-    isOnline: false
-  },
-  {
-    id: 3,
-    name: "Emily Watson",
-    role: "Data Scientist",
-    company: "Netflix",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    skills: ["Python", "Machine Learning", "Statistics"],
-    matchScore: 92,
-    isOnline: true
-  }
-];
-
-const mockEvents = [
-  {
-    id: 1,
-    title: "Tech Career Fair 2024",
-    date: "2024-02-15",
-    time: "10:00 AM",
-    location: "Main Campus Auditorium",
-    type: "Career",
-    attendees: 150,
-    isNew: true
-  },
-  {
-    id: 2,
-    title: "AI Workshop Series",
-    date: "2024-02-20",
-    time: "2:00 PM",
-    location: "Computer Science Building",
-    type: "Workshop",
-    attendees: 45,
-    isNew: true
-  },
-  {
-    id: 3,
-    title: "Alumni Networking Mixer",
-    date: "2024-02-25",
-    time: "6:00 PM",
-    location: "University Club",
-    type: "Networking",
-    attendees: 80,
-    isNew: false
-  }
-];
-
-// Mock user role for demonstration
-const userRole = "alumni"; // Change to 'student' or 'admin' to hide profile tab
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useUser();
   const [activeTab, setActiveTab] = useState("overview");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [alumni, setAlumni] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
-  const [notifications, setNotifications] = useState(3);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -176,9 +110,9 @@ const Dashboard = () => {
             <div className="flex items-center space-x-4">
               <Button variant="ghost" size="sm" className="relative">
                 <Bell className="w-5 h-5" />
-                {notifications > 0 && (
+                {notifications.length > 0 && (
                   <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">
-                    { notifications}
+                    { notifications.length}
                   </Badge>
                 )}
               </Button>
@@ -213,10 +147,11 @@ const Dashboard = () => {
 
         {/* Main Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white/80 rounded-xl shadow-md p-1 gap-2 mb-6">
+          <TabsList className="grid w-full grid-cols-5 bg-white/80 rounded-xl shadow-md p-1 gap-2 mb-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="alumni">Alumni Connections</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="campusgpt">CampusGPT</TabsTrigger>
           </TabsList>
 
@@ -279,28 +214,37 @@ const Dashboard = () => {
                   <CardDescription>Top AI-suggested connections for you</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockAlumni.slice(0, 2).map((alumni) => (
-                    <div key={alumni.id} className="flex items-center justify-between p-3 rounded-lg border border-orange-100 bg-orange-50">
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage src={alumni.avatar} />
-                          <AvatarFallback>{alumni.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium text-sm">{alumni.name}</p>
-                          <p className="text-xs text-gray-500">{alumni.role} at {alumni.company}</p>
+                  {alumni.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Users className="w-6 h-6 text-gray-400" />
+                      </div>
+                      <p className="text-sm text-gray-500">No alumni connections yet</p>
+                    </div>
+                  ) : (
+                    alumni.slice(0, 2).map((alumni) => (
+                      <div key={alumni.id} className="flex items-center justify-between p-3 rounded-lg border border-orange-100 bg-orange-50">
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="w-10 h-10">
+                            <AvatarImage src={alumni.avatar} />
+                            <AvatarFallback>{alumni.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">{alumni.name}</p>
+                            <p className="text-xs text-gray-500">{alumni.role} at {alumni.company}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {alumni.matchScore}% match
+                          </Badge>
+                          <Button size="sm" onClick={() => handleRequestGuidance(alumni.id)}>
+                            Request
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="secondary" className="text-xs">
-                          {alumni.matchScore}% match
-                        </Badge>
-                        <Button size="sm" onClick={() => handleRequestGuidance(alumni.id)}>
-                          Request
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </CardContent>
               </Card>
 
@@ -313,23 +257,32 @@ const Dashboard = () => {
                   <CardDescription>Events you might be interested in</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockEvents.slice(0, 2).map((event) => (
-                    <div key={event.id} className="flex items-center justify-between p-3 rounded-lg border border-pink-100 bg-pink-50">
-                      <div>
-                        <p className="font-medium text-sm">{event.title}</p>
-                        <p className="text-xs text-gray-500">{event.date} at {event.time}</p>
-                        <p className="text-xs text-gray-500">{event.location}</p>
+                  {events.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Calendar className="w-6 h-6 text-gray-400" />
                       </div>
-                      <div className="flex items-center space-x-2">
-                        {event.isNew && (
-                          <Badge variant="destructive" className="text-xs">New</Badge>
-                        )}
-                        <Button size="sm" variant="outline" onClick={() => handleEventRegistration(event.id)}>
-                          Register
-                        </Button>
-                      </div>
+                      <p className="text-sm text-gray-500">No upcoming events</p>
                     </div>
-                  ))}
+                  ) : (
+                    events.slice(0, 2).map((event) => (
+                      <div key={event.id} className="flex items-center justify-between p-3 rounded-lg border border-pink-100 bg-pink-50">
+                        <div>
+                          <p className="font-medium text-sm">{event.title}</p>
+                          <p className="text-xs text-gray-500">{event.date} at {event.time}</p>
+                          <p className="text-xs text-gray-500">{event.location}</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {event.isNew && (
+                            <Badge variant="destructive" className="text-xs">New</Badge>
+                          )}
+                          <Button size="sm" variant="outline" onClick={() => handleEventRegistration(event.id)}>
+                            Register
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -351,50 +304,60 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockAlumni.map((alumni) => (
-                <Card key={alumni.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="w-12 h-12">
-                          <AvatarImage src={alumni.avatar} />
-                          <AvatarFallback>{alumni.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <CardTitle className="text-base">{alumni.name}</CardTitle>
-                          <CardDescription>{alumni.role} at {alumni.company}</CardDescription>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <div className={`w-2 h-2 rounded-full ${alumni.isOnline ? 'bg-green-500' : 'bg-gray-300'}`} />
-                        <Badge variant="secondary" className="text-xs">
-                          {alumni.matchScore}% match
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">Skills</p>
-                        <div className="flex flex-wrap gap-1">
-                          {alumni.skills.map((skill, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {skill}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <Button 
-                        className="w-full" 
-                        onClick={() => handleRequestGuidance(alumni.id)}
-                      >
-                        Request Guidance
-                      </Button>
-                    </div>
-                  </CardContent>
+              {alumni.length === 0 ? (
+                <Card className="col-span-full p-8 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Alumni Connections Yet</h3>
+                  <p className="text-gray-600 mb-4">Connect with alumni to get mentorship and career guidance.</p>
                 </Card>
-              ))}
+              ) : (
+                alumni.map((alumni) => (
+                  <Card key={alumni.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="w-12 h-12">
+                            <AvatarImage src={alumni.avatar} />
+                            <AvatarFallback>{alumni.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <CardTitle className="text-base">{alumni.name}</CardTitle>
+                            <CardDescription>{alumni.role} at {alumni.company}</CardDescription>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <div className={`w-2 h-2 rounded-full ${alumni.isOnline ? 'bg-green-500' : 'bg-gray-300'}`} />
+                          <Badge variant="secondary" className="text-xs">
+                            {alumni.matchScore}% match
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mb-1">Skills</p>
+                          <div className="flex flex-wrap gap-1">
+                            {alumni.skills.map((skill, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <Button 
+                          className="w-full" 
+                          onClick={() => handleRequestGuidance(alumni.id)}
+                        >
+                          Request Guidance
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </TabsContent>
 
@@ -412,41 +375,195 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockEvents.map((event) => (
-                <Card key={event.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">{event.title}</CardTitle>
-                      {event.isNew && (
-                        <Badge variant="destructive">New</Badge>
-                      )}
-                    </div>
-                    <CardDescription>{event.location}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Date & Time</span>
-                        <span className="font-medium">{event.date} at {event.time}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Type</span>
-                        <Badge variant="outline">{event.type}</Badge>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Attendees</span>
-                        <span className="font-medium">{event.attendees} registered</span>
-                      </div>
-                      <Button 
-                        className="w-full" 
-                        onClick={() => handleEventRegistration(event.id)}
-                      >
-                        Register for Event
-                      </Button>
-                    </div>
-                  </CardContent>
+              {events.length === 0 ? (
+                <Card className="col-span-full p-8 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Calendar className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Events Yet</h3>
+                  <p className="text-gray-600 mb-4">Events will appear here once they are created and available for registration.</p>
                 </Card>
-              ))}
+              ) : (
+                events.map((event) => (
+                  <Card key={event.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base">{event.title}</CardTitle>
+                        {event.isNew && (
+                          <Badge variant="destructive">New</Badge>
+                        )}
+                      </div>
+                      <CardDescription>{event.location}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Date & Time</span>
+                          <span className="font-medium">{event.date} at {event.time}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Type</span>
+                          <Badge variant="outline">{event.type}</Badge>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Attendees</span>
+                          <span className="font-medium">{event.attendees} registered</span>
+                        </div>
+                        <Button 
+                          className="w-full" 
+                          onClick={() => handleEventRegistration(event.id)}
+                        >
+                          Register for Event
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Notifications Tab */}
+          <TabsContent value="notifications" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Your Notifications</h3>
+                <p className="text-sm text-gray-600">Stay updated with campus events and opportunities</p>
+              </div>
+              <Button variant="outline" size="sm">
+                Mark all as read
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {/* New Event Notifications */}
+              <Card className="border-l-4 border-l-green-500">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <Calendar className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-base">New Event: Tech Career Fair 2024</CardTitle>
+                        <CardDescription>Hosted by Sarah Chen (Google)</CardDescription>
+                      </div>
+                    </div>
+                    <Badge variant="destructive" className="text-xs">New</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-3">
+                    A new career fair has been created! Connect with top tech companies and explore career opportunities.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-500">
+                      <span>📅 Feb 15, 2024 • 10:00 AM</span>
+                      <br />
+                      <span>📍 Main Campus Auditorium</span>
+                    </div>
+                    <Button size="sm" onClick={() => handleEventRegistration(1)}>
+                      Register Now
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-l-4 border-l-blue-500">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Users className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-base">New Alumni Match: Emily Watson</CardTitle>
+                        <CardDescription>Data Scientist at Netflix</CardDescription>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="text-xs">Match</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-3">
+                    We found a great match for you! Emily has experience in AI/ML and can help with your career goals.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-500">
+                      <span>🎯 92% match score</span>
+                      <br />
+                      <span>💼 Skills: Python, Machine Learning, Statistics</span>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => handleRequestGuidance(3)}>
+                      Request Guidance
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-l-4 border-l-orange-500">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                        <BookOpen className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-base">Workshop Registration Confirmed</CardTitle>
+                        <CardDescription>AI Workshop Series</CardDescription>
+                      </div>
+                    </div>
+                    <Badge variant="default" className="text-xs">Confirmed</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Your registration for the AI Workshop Series has been confirmed. Don't forget to attend!
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-500">
+                      <span>📅 Feb 20, 2024 • 2:00 PM</span>
+                      <br />
+                      <span>📍 Computer Science Building</span>
+                    </div>
+                    <Button size="sm" variant="outline">
+                      View Details
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-l-4 border-l-gray-300">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                        <Bell className="w-5 h-5 text-gray-600" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-base">Profile Update Reminder</CardTitle>
+                        <CardDescription>Complete your profile for better matches</CardDescription>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-xs">Reminder</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Your profile is 85% complete. Adding more details will help us find better alumni matches for you.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-500">
+                      <span>📊 85% complete</span>
+                      <br />
+                      <span>✨ Add skills, interests, and goals</span>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => setShowProfileSetup(true)}>
+                      Update Profile
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
@@ -500,13 +617,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* Profile Tab */}
-          {userRole === "alumni" && (
-            <TabsContent value="profile" className="space-y-6">
-              <ProfileSection />
-            </TabsContent>
-          )}
         </Tabs>
       </div>
 

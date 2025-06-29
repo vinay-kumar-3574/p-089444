@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Bell, 
   Users, 
@@ -18,7 +19,8 @@ import {
   CheckCircle,
   CalendarCheck,
   CalendarDays,
-  Crown
+  Crown,
+  MapPin
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,130 +35,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 
-// Mock data for mentorship requests
-const mockMentorshipRequests = [
-  {
-    id: 1,
-    student: {
-      name: "Sarah Johnson",
-      email: "sarah.johnson@university.edu",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      major: "Computer Science",
-      year: "Junior"
-    },
-    request: {
-      subject: "Career Guidance in Software Engineering",
-      message: "I'm looking for guidance on transitioning from academia to industry. Would love to discuss career paths, interview preparation, and skill development.",
-      skills: ["React", "Node.js", "System Design"],
-      urgency: "medium",
-      preferredTime: "Weekdays after 6 PM",
-      duration: "30 minutes"
-    },
-    status: "pending",
-    createdAt: "2024-02-10T10:30:00Z",
-    requestType: "career"
-  },
-  {
-    id: 2,
-    student: {
-      name: "Michael Chen",
-      email: "michael.chen@university.edu",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-      major: "Data Science",
-      year: "Senior"
-    },
-    request: {
-      subject: "Project Portfolio Review",
-      message: "I've been working on a machine learning project and would appreciate feedback on my portfolio and suggestions for improvement.",
-      skills: ["Python", "Machine Learning", "Data Analysis"],
-      urgency: "low",
-      preferredTime: "Weekends",
-      duration: "45 minutes"
-    },
-    status: "pending",
-    createdAt: "2024-02-09T14:20:00Z",
-    requestType: "portfolio"
-  },
-  {
-    id: 3,
-    student: {
-      name: "Emily Rodriguez",
-      email: "emily.rodriguez@university.edu",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-      major: "Business Administration",
-      year: "Sophomore"
-    },
-    request: {
-      subject: "Networking and Industry Connections",
-      message: "I'm interested in learning about networking strategies and building professional relationships in the tech industry.",
-      skills: ["Networking", "Communication", "Leadership"],
-      urgency: "high",
-      preferredTime: "Any time",
-      duration: "60 minutes"
-    },
-    status: "accepted",
-    createdAt: "2024-02-08T09:15:00Z",
-    requestType: "networking"
-  }
-];
-
-// Mock data for mentorship history
-const mockMentorshipHistory = [
-  {
-    id: 1,
-    student: {
-      name: "David Kim",
-      email: "david.kim@university.edu",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      major: "Computer Science"
-    },
-    session: {
-      date: "2024-02-05",
-      duration: "45 minutes",
-      type: "Video Call",
-      topic: "Interview Preparation",
-      notes: "Discussed behavioral questions and technical interview strategies"
-    },
-    feedback: {
-      rating: 5,
-      comment: "Extremely helpful session! Got great insights on interview preparation.",
-      tags: ["helpful", "knowledgeable", "patient"]
-    },
-    status: "completed"
-  },
-  {
-    id: 2,
-    student: {
-      name: "Lisa Wang",
-      email: "lisa.wang@university.edu",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      major: "Data Science"
-    },
-    session: {
-      date: "2024-01-28",
-      duration: "30 minutes",
-      type: "Phone Call",
-      topic: "Career Transition",
-      notes: "Explored different career paths in data science"
-    },
-    feedback: {
-      rating: 4,
-      comment: "Very informative session about career opportunities.",
-      tags: ["informative", "supportive"]
-    },
-    status: "completed"
-  }
-];
-
 const MentorshipDashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useUser();
-  const [activeTab, setActiveTab] = useState("inbox");
+  const [activeTab, setActiveTab] = useState("event-requests");
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [showChatDialog, setShowChatDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [eventRequests, setEventRequests] = useState([]);
+  const [mentorshipRequests, setMentorshipRequests] = useState([]);
+  const [mentorshipHistory, setMentorshipHistory] = useState([]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -211,6 +101,33 @@ const MentorshipDashboard = () => {
     setShowChatDialog(true);
   };
 
+  const handleAcceptEventRequest = (requestId: number) => {
+    // TODO: Implement API call to accept event request
+    setEventRequests(prev => prev.map(req => 
+      req.id === requestId ? { ...req, status: 'accepted' } : req
+    ));
+    toast({
+      title: "Event request accepted!",
+      description: "The event has been created and students will be notified.",
+    });
+  };
+
+  const handleDeclineEventRequest = (requestId: number) => {
+    // TODO: Implement API call to decline event request
+    setEventRequests(prev => prev.map(req => 
+      req.id === requestId ? { ...req, status: 'declined' } : req
+    ));
+    toast({
+      title: "Event request declined",
+      description: "The event request has been declined.",
+    });
+  };
+
+  // Function to add new event request (called when admin sends request)
+  const addNewEventRequest = (newRequest: any) => {
+    setEventRequests(prev => [newRequest, ...prev]);
+  };
+
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
       case 'high': return 'bg-red-100 text-red-800';
@@ -230,7 +147,7 @@ const MentorshipDashboard = () => {
     }
   };
 
-  const filteredRequests = mockMentorshipRequests.filter(request => {
+  const filteredRequests = mentorshipRequests.filter(request => {
     const matchesSearch = request.student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          request.request.subject.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus === 'all' || request.status === filterStatus;
@@ -238,10 +155,13 @@ const MentorshipDashboard = () => {
   });
 
   const stats = {
-    totalRequests: mockMentorshipRequests.length,
-    pendingRequests: mockMentorshipRequests.filter(r => r.status === 'pending').length,
-    completedSessions: mockMentorshipHistory.length,
-    averageRating: mockMentorshipHistory.reduce((acc, session) => acc + session.feedback.rating, 0) / mockMentorshipHistory.length
+    totalRequests: mentorshipRequests.length,
+    pendingRequests: mentorshipRequests.filter(r => r.status === 'pending').length,
+    completedSessions: mentorshipHistory.length,
+    averageRating: mentorshipHistory.length > 0 
+      ? mentorshipHistory.reduce((acc, session) => acc + session.feedback.rating, 0) / mentorshipHistory.length 
+      : 0,
+    pendingEventRequests: eventRequests.filter(r => r.status === 'pending').length
   };
 
   return (
@@ -273,7 +193,7 @@ const MentorshipDashboard = () => {
               <Button variant="ghost" size="sm" className="relative">
                 <Bell className="w-5 h-5" />
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">
-                  {stats.pendingRequests}
+                  {stats.pendingRequests + stats.pendingEventRequests}
                 </Badge>
               </Button>
               
@@ -306,7 +226,7 @@ const MentorshipDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
@@ -326,6 +246,17 @@ const MentorshipDashboard = () => {
             <CardContent>
               <div className="text-2xl font-bold">{stats.pendingRequests}</div>
               <p className="text-xs text-yellow-100">Awaiting response</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Event Requests</CardTitle>
+              <Calendar className="h-4 w-4" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.pendingEventRequests}</div>
+              <p className="text-xs text-orange-100">From admin</p>
             </CardContent>
           </Card>
 
@@ -355,9 +286,9 @@ const MentorshipDashboard = () => {
         {/* Main Dashboard */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 bg-white shadow-sm">
-            <TabsTrigger value="inbox" className="flex items-center gap-2">
-              <Mail className="w-4 h-4" />
-              Requests Inbox
+            <TabsTrigger value="event-requests" className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              Event Requests
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
@@ -365,18 +296,16 @@ const MentorshipDashboard = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Requests Inbox Tab */}
-          <TabsContent value="inbox" className="space-y-6">
+          {/* Event Requests Tab */}
+          <TabsContent value="event-requests" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Mentorship Requests</h3>
+              <h3 className="text-lg font-semibold">Event Requests from Admin</h3>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Search requests..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search event requests..."
                   className="w-64"
                 />
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <Select defaultValue="all">
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
@@ -391,105 +320,116 @@ const MentorshipDashboard = () => {
             </div>
 
             <div className="space-y-4">
-              {filteredRequests.map((request) => (
-                <Card key={request.id} className="overflow-hidden">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-4">
-                        <Avatar>
-                          <AvatarImage src={request.student.avatar} />
-                          <AvatarFallback>{request.student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <CardTitle className="text-lg">{request.student.name}</CardTitle>
-                          <CardDescription>
-                            {request.student.major} • {request.student.year} • {request.student.email}
-                          </CardDescription>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getUrgencyColor(request.request.urgency)}>
-                          {request.request.urgency} priority
-                        </Badge>
-                        <Badge className={getStatusColor(request.status)}>
-                          {request.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold text-gray-900">{request.request.subject}</h4>
-                        <p className="text-gray-600 mt-1">{request.request.message}</p>
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-2">
-                        {request.request.skills.map((skill) => (
-                          <Badge key={skill} variant="outline" className="text-xs">
-                            {skill}
-                          </Badge>
-                        ))}
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          <span>{request.request.duration}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4" />
-                          <span>{request.request.preferredTime}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CalendarDays className="w-4 h-4" />
-                          <span>{new Date(request.createdAt).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-
-                      {request.status === 'pending' && (
-                        <div className="flex gap-2 pt-2">
-                          <Button 
-                            onClick={() => handleAcceptRequest(request.id)}
-                            className="flex items-center gap-2"
-                          >
-                            <Check className="w-4 h-4" />
-                            Accept
-                          </Button>
-                          <Button 
-                            variant="outline"
-                            onClick={() => handleDeclineRequest(request.id)}
-                            className="flex items-center gap-2"
-                          >
-                            <X className="w-4 h-4" />
-                            Decline
-                          </Button>
-                        </div>
-                      )}
-
-                      {request.status === 'accepted' && (
-                        <div className="flex gap-2 pt-2">
-                          <Button 
-                            onClick={() => handleScheduleMeeting(request)}
-                            className="flex items-center gap-2"
-                          >
-                            <CalendarCheck className="w-4 h-4" />
-                            Schedule Meeting
-                          </Button>
-                          <Button 
-                            variant="outline"
-                            onClick={() => handleStartChat(request)}
-                            className="flex items-center gap-2"
-                          >
-                            <MessageCircle className="w-4 h-4" />
-                            Start Chat
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
+              {eventRequests.length === 0 ? (
+                <Card className="p-8 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Calendar className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Event Requests Yet</h3>
+                  <p className="text-gray-600 mb-4">Event requests from admin will appear here when they are sent.</p>
                 </Card>
-              ))}
+              ) : (
+                eventRequests.map((request) => (
+                  <Card key={request.id} className="overflow-hidden">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-pink-500 rounded-lg flex items-center justify-center">
+                            <Crown className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg">{request.admin.name}</CardTitle>
+                            <CardDescription>
+                              {request.admin.email} • Requested on {request.requestedDate}
+                            </CardDescription>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getStatusColor(request.status)}>
+                            {request.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-semibold text-gray-900 text-lg">{request.event.title}</h4>
+                          <p className="text-gray-600 mt-1">{request.event.description}</p>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2">
+                          {request.event.tags.map((tag) => (
+                            <Badge key={tag} variant="outline" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            <span>{request.event.date} at {request.event.time}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4" />
+                            <span>{request.event.location}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4" />
+                            <span>Max {request.event.maxSeats} students</span>
+                          </div>
+                        </div>
+
+                        {request.status === 'pending' && (
+                          <div className="flex gap-2 pt-2">
+                            <Button 
+                              onClick={() => handleAcceptEventRequest(request.id)}
+                              className="flex items-center gap-2"
+                            >
+                              <Check className="w-4 h-4" />
+                              Accept & Create Event
+                            </Button>
+                            <Button 
+                              variant="outline"
+                              onClick={() => handleDeclineEventRequest(request.id)}
+                              className="flex items-center gap-2"
+                            >
+                              <X className="w-4 h-4" />
+                              Decline
+                            </Button>
+                          </div>
+                        )}
+
+                        {request.status === 'accepted' && (
+                          <div className="flex gap-2 pt-2">
+                            <Button 
+                              variant="outline"
+                              className="flex items-center gap-2"
+                            >
+                              <Calendar className="w-4 h-4" />
+                              View Event Details
+                            </Button>
+                            <Button 
+                              variant="outline"
+                              className="flex items-center gap-2"
+                            >
+                              <Users className="w-4 h-4" />
+                              View Registrations
+                            </Button>
+                          </div>
+                        )}
+
+                        {request.status === 'declined' && (
+                          <div className="pt-2">
+                            <p className="text-sm text-gray-500">This request was declined on {request.deadline}</p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </TabsContent>
 
@@ -511,77 +451,87 @@ const MentorshipDashboard = () => {
             </div>
 
             <div className="space-y-4">
-              {mockMentorshipHistory.map((session) => (
-                <Card key={session.id} className="overflow-hidden">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-4">
-                        <Avatar>
-                          <AvatarImage src={session.student.avatar} />
-                          <AvatarFallback>{session.student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <CardTitle className="text-lg">{session.student.name}</CardTitle>
-                          <CardDescription>
-                            {session.student.major} • {session.student.email}
-                          </CardDescription>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          {[...Array(session.feedback.rating)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          ))}
-                        </div>
-                        <Badge className="bg-green-100 text-green-800">
-                          {session.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4" />
-                          <span>{session.session.date}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          <span>{session.session.duration}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {session.session.type === 'Video Call' ? (
-                            <Video className="w-4 h-4" />
-                          ) : (
-                            <Phone className="w-4 h-4" />
-                          )}
-                          <span>{session.session.type}</span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h4 className="font-semibold text-gray-900">Topic: {session.session.topic}</h4>
-                        <p className="text-gray-600 mt-1">{session.session.notes}</p>
-                      </div>
-
-                      {session.feedback && (
-                        <div className="border-t pt-4">
-                          <h5 className="font-semibold text-gray-900 mb-2">Student Feedback</h5>
-                          <p className="text-gray-600 mb-2">"{session.feedback.comment}"</p>
-                          <div className="flex flex-wrap gap-1">
-                            {session.feedback.tags.map((tag) => (
-                              <Badge key={tag} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
+              {mentorshipHistory.length === 0 ? (
+                <Card className="p-8 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <BookOpen className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Mentorship History Yet</h3>
+                  <p className="text-gray-600 mb-4">Your completed mentorship sessions will appear here.</p>
+                </Card>
+              ) : (
+                mentorshipHistory.map((session) => (
+                  <Card key={session.id} className="overflow-hidden">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center space-x-4">
+                          <Avatar>
+                            <AvatarImage src={session.student.avatar} />
+                            <AvatarFallback>{session.student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <CardTitle className="text-lg">{session.student.name}</CardTitle>
+                            <CardDescription>
+                              {session.student.major} • {session.student.email}
+                            </CardDescription>
                           </div>
                         </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            {[...Array(session.feedback.rating)].map((_, i) => (
+                              <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            ))}
+                          </div>
+                          <Badge className="bg-green-100 text-green-800">
+                            {session.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            <span>{session.session.date}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            <span>{session.session.duration}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {session.session.type === 'Video Call' ? (
+                              <Video className="w-4 h-4" />
+                            ) : (
+                              <Phone className="w-4 h-4" />
+                            )}
+                            <span>{session.session.type}</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-semibold text-gray-900">Topic: {session.session.topic}</h4>
+                          <p className="text-gray-600 mt-1">{session.session.notes}</p>
+                        </div>
+
+                        {session.feedback && (
+                          <div className="border-t pt-4">
+                            <h5 className="font-semibold text-gray-900 mb-2">Student Feedback</h5>
+                            <p className="text-gray-600 mb-2">"{session.feedback.comment}"</p>
+                            <div className="flex flex-wrap gap-1">
+                              {session.feedback.tags.map((tag) => (
+                                <Badge key={tag} variant="outline" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </TabsContent>
         </Tabs>
